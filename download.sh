@@ -23,6 +23,7 @@ function process_folder() {
 			url="https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_$SUFFIX/$YEAR/vg250_$DATE.gk3.shape.ebenen.zip"
 			
 			url="${url//2013\/vg250_12-31/2013\/vg250_31-12}" #Trottel
+			url="${url//2014\/vg250_12-31/2014\/vg250_31-12}" #Trottel
 			
 			echo -n " downloading…"
 			mkdir -p "tmp/$YEAR-$DATE"
@@ -83,8 +84,6 @@ function process_folder() {
 	while IFS= read -r YEAR; do
 		process_year $YEAR
 	done <<<"$years"
-
-	exit
 }
 
 process_folder "1231"
