@@ -53,7 +53,7 @@ function process_folder() {
 
 			ensure_data
 
-			FILENAME_IN=$(find tmp/$YEAR-$DATE -type f $EXPRESSION)
+			FILENAME_IN=$(find tmp/$YEAR-$DATE -type f -maxdepth 4 $EXPRESSION)
 
 			if [ -z "$FILENAME_IN" ]; then
 				echo ""
@@ -61,6 +61,7 @@ function process_folder() {
 				exit 1
 			fi
 
+			rm tmp/*.geojson
 			echo -n " convert…"
 			ogr2ogr -t_srs EPSG:4326 -lco COORDINATE_PRECISION=6 tmp/tmp1.geojson "$FILENAME_IN"
 
