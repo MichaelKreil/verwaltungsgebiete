@@ -22,9 +22,18 @@ function process_folder() {
 			fi
 			url="https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_$SUFFIX/$YEAR/vg250_$DATE.gk3.shape.ebenen.zip"
 			
+			url="${url//2013\/vg250_12-31/2013\/vg250_31-12}" #Trottel
+			
 			echo -n " downloading…"
 			mkdir -p "tmp/$YEAR-$DATE"
 			wget -q "$url" -O $filename
+
+			if [[ $(stat -c %s $filename) < "10000000" ]]; then
+				echo ""
+				echo "Error: when downloading $url"
+				echo "file size is too small"
+				exit 1
+			fi
 			
 			echo -n " unzipping…"
 			unzip -qq $filename -d "tmp/$YEAR-$DATE"
@@ -32,7 +41,7 @@ function process_folder() {
 
 		function process_layer() {
 			NAME=$1
-			EXPRESSION=$2
+			EXPRESSION="-iname vg250${2//,/.shp -or -iname vg250}.shp"
 			FILENAME_OUT="data/$YEAR-$DATE/$NAME.geojson.br"
 
 			if test -f "$FILENAME_OUT"; then
@@ -46,8 +55,9 @@ function process_folder() {
 			FILENAME_IN=$(find tmp/$YEAR-$DATE -type f $EXPRESSION)
 
 			if [ -z "$FILENAME_IN" ]; then
-				echo "PANIK"
-				exit
+				echo ""
+				echo "Error: could not find file"
+				exit 1
 			fi
 
 			echo -n " convert…"
@@ -63,11 +73,11 @@ function process_folder() {
 			echo " ✅"
 		}
 
-		process_layer "1_bundeslaender" '-name vg250lnd.shp'
-		process_layer "2_regierungsbezirke" '-name vg250bez.shp'
-		process_layer "3_kreise" '-name vg250krs.shp'
-		process_layer "4_verwaltungsgemeinschaften" '-name vg250amt.shp'
-		process_layer "5_gemeinden" '-name vg250gem.shp'
+		process_layer "1_bundeslaender"             'lnd,_bld,_lan'
+		process_layer "2_regierungsbezirke"         'bez,_rbz'
+		process_layer "3_kreise"                    'krs,_krs'
+		process_layer "4_verwaltungsgemeinschaften" 'amt,_vwg'
+		process_layer "5_gemeinden"                 'gem,_gem'
 	}
 
 	while IFS= read -r YEAR; do
