@@ -28,10 +28,10 @@ function process_folder() {
 			
 			echo -n " downloading…"
 			mkdir -p "tmp/$YEAR-$DATE"
-			wget -q "$url" -O tmp/download.zip
+			wget -q --show-progress "$url" -O tmp/download.zip
 			mv tmp/download.zip $filename
 			
-			echo -n " unzipping…"
+			echo "      unzipping"
 			unzip -qq $filename -d "tmp/$YEAR-$DATE"
 		}
 
@@ -44,9 +44,9 @@ function process_folder() {
 				return
 			fi
 
-			echo -n "      process layer $NAME:"
-
 			ensure_data
+
+			echo -n "      process layer $NAME:"
 
 			FILENAME_IN=$(find tmp/$YEAR-$DATE -type f -maxdepth 4 $EXPRESSION)
 
@@ -57,13 +57,13 @@ function process_folder() {
 			fi
 
 			rm tmp/*.geojson 2> /dev/null || true
-			echo -n " convert…"
+			echo -n " convert,"
 			ogr2ogr -t_srs EPSG:4326 -lco COORDINATE_PRECISION=6 tmp/tmp1.geojson "$FILENAME_IN"
 
-			echo -n " cleanup…"
+			echo -n " cleanup,"
 			jq -cr '.' tmp/tmp1.geojson > tmp/tmp2.geojson
 
-			echo -n " compress…"
+			echo -n " compress,"
 			brotli -Zc tmp/tmp2.geojson > tmp/tmp3.geojson.br
 
 			mv tmp/tmp3.geojson.br $FILENAME_OUT
