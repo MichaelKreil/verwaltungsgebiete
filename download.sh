@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 cd "$(dirname "$0")"
 
 mkdir -p "tmp"
@@ -27,14 +28,8 @@ function process_folder() {
 			
 			echo -n " downloading…"
 			mkdir -p "tmp/$YEAR-$DATE"
-			wget -q "$url" -O $filename
-
-			if [[ $(stat -c %s $filename) < "10000000" ]]; then
-				echo ""
-				echo "Error: when downloading $url"
-				echo "file size is too small"
-				exit 1
-			fi
+			wget -q "$url" -O tmp/download.zip
+			mv tmp/download.zip $filename
 			
 			echo -n " unzipping…"
 			unzip -qq $filename -d "tmp/$YEAR-$DATE"
@@ -61,7 +56,7 @@ function process_folder() {
 				exit 1
 			fi
 
-			rm tmp/*.geojson
+			rm tmp/*.geojson 2> /dev/null || true
 			echo -n " convert…"
 			ogr2ogr -t_srs EPSG:4326 -lco COORDINATE_PRECISION=6 tmp/tmp1.geojson "$FILENAME_IN"
 
