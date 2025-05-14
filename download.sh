@@ -58,7 +58,7 @@ function process_folder() {
 
 			rm tmp/*.geojson 2> /dev/null || true
 			echo -n " convert,"
-			ogr2ogr -t_srs EPSG:4326 -lco COORDINATE_PRECISION=6 tmp/tmp1.geojson "$FILENAME_IN"
+			ogr2ogr -t_srs EPSG:4326 -lco COORDINATE_PRECISION=5 tmp/tmp1.geojson "$FILENAME_IN"
 
 			echo -n " cleanup,"
 			jq -cr '.' tmp/tmp1.geojson > tmp/tmp2.geojson
